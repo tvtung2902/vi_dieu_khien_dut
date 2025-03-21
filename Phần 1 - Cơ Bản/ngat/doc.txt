@@ -1,0 +1,9 @@
+- Khi sự kiện ngắt ngoài xảy ra thì sẽ có 1 hàm được gọi tự động
+- phân biệt với ngắt trong: dựa vào cấu hình trong board
+- sử dung ngắt ngoài chương trình sẽ xử lí nhanh hơn
+- mức độ ưu tiên thì ngắt ngoài có ưu tiên cao nhất => chỉ đc dùng cho sự kiện k tốn nhiều thời gian hay là sự kiện bất ngờ
+- Arduino uno: có 2 ngắt là ngắt 0 (tương ứng với chân 2) và ngắt 1(tương ứng với chân 3)
+- cú pháp ngắt: attachInterrupt(interrupt, ISR, mode)
++ interrupt: chân ngắt(0, 1, 2 or digitalPinToInterrupt(pin))
++ ISR: hàm xử lí ngắt
++ mode: LOW(thấp), HIGH(cao), RISING(thấp sang cao), FALLING(cao về thấp) 
