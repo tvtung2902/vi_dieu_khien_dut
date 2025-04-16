@@ -20,4 +20,11 @@
 
 - **Demo 4:** Biến trở điều khiển 10 LED
  
-  ![LED Blink](Demo/bien-tro-dieu-khien-10-led.gif)  
+  ![LED Blink](Demo/bien-tro-dieu-khien-10-led.gif)
+
+
+- **Demo 5:** Nút bấm
+  
+
+
+- **Demo 6:** Nút bấm + ngắt
