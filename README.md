@@ -18,6 +18,6 @@
   ![LED Blink](Demo/10-led-1.gif)  
 
 
-- **Demo 4:** Biến trở điều khiển 10 led
+- **Demo 4:** Biến trở điều khiển 10 LED
  
   ![LED Blink](Demo/bien-tro-dieu-khien-10-led.gif)  
