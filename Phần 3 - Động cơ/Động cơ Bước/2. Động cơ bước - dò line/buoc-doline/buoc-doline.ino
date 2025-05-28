@@ -9,7 +9,7 @@ Stepper stepper(BUOC, 8, 10, 9, 11);
 void setup() {
   pinMode(LINE, INPUT);
   Serial.begin(9600);
-  stepper.setSpeed(10);  // Tốc độ quay RPM
+  stepper.setSpeed(10);
 }
 
 void loop() {
@@ -36,8 +36,7 @@ Cách lắp:
     + GND -> GND
 - Động cơ bước ULN2003:
     + IN1 -> D8
-    + IN2 -> D10
-    + IN3 -> D9
+    + IN2 -> D9
+    + IN3 -> D10
     + IN4 -> D11
-    + Nguồn 5V và GND chung Arduino
 */

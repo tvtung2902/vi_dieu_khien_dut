@@ -20,26 +20,22 @@ void loop() {
     Serial.print("X: ");
     Serial.print(xValue);
     Serial.print(" | Z: ");
-    Serial.println(zState == LOW ? "Pressed" : "Released");
+    Serial.println(zState == LOW ? "Không nhấn" : "Nhấn");
 
     if (zState == LOW) {
-        Serial.println("Z button pressed -> Motor STOP");
         digitalWrite(in1, LOW);
         digitalWrite(in2, LOW);
         analogWrite(ena, 0);
     } else {
         if (xValue < 400) {
-            Serial.println("Moving LEFT");
             digitalWrite(in1, HIGH);
             digitalWrite(in2, LOW);
             analogWrite(ena, 40);
         } else if (xValue > 600) {
-            Serial.println("Moving RIGHT");
             digitalWrite(in1, LOW);
             digitalWrite(in2, HIGH);
             analogWrite(ena, 50);
         } else {
-            Serial.println("Joystick centered -> Motor STOP");
             digitalWrite(in1, LOW);
             digitalWrite(in2, LOW);
             analogWrite(ena, 0);
@@ -62,6 +58,6 @@ Cách lắp mạch:
     + IN2           -> D8
     + ENA           -> D9 (PWM)
     + OUT1/OUT2     -> Motor DC
-    + VCC (L298N)   -> nguồn motor (ví dụ 12V)
+    + VCC (L298N)   -> Pin(+)
     + GND           -> GND chung với Arduino
 */

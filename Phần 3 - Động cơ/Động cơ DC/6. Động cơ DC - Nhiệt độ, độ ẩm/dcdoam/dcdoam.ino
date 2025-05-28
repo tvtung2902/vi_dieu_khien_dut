@@ -59,5 +59,5 @@ Cách lắp:
     + IN2 -> D8
     + ENA -> D9 (PWM)
     + OUT1/OUT2 -> Motor DC
-    + VCC -> nguồn motor, GND nối chung với Arduino
+    + VCC -> Pin(+), GND nối chung với Arduino
 */

@@ -13,14 +13,14 @@ void setup() {
 void loop() {
     int analogread = analogRead(analog);
     Serial.println(analogread);
-    if(analogread < 500) {
-        digitalWrite(in1, HIGH);
-        digitalWrite(in2, LOW);
-        analogWrite(e, 40);
-    } else {
+    if(analogread < 800) {
         digitalWrite(in1, LOW);
         digitalWrite(in2, HIGH);
-        analogWrite(e, 50);
+        analogWrite(e, 100);
+    } else {
+        digitalWrite(in1, HIGH);
+        digitalWrite(in2, LOW);
+        analogWrite(e, 100);
     }
     delay(1000);
 }
@@ -36,7 +36,7 @@ Cách lắp:
     + IN2 -> D8
     + ENA -> D9 (PWM)
     + OUT1/OUT2 -> Motor DC
-    + VCC -> nguồn motor (ví dụ 12V), GND nối chung với Arduino
+    + VCC -> Pin, GND nối chung với Arduino
 */
 
 //- Cảm biến ánh sáng:
