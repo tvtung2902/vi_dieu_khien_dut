@@ -19,3 +19,8 @@ void loop() {
     Serial.println(speed);
     analogWrite(e, 40);
 }
+
+// cách lắp:
+// Biến trở: giữa -> A0, 2 chân ngoài -> 5V và GND
+// L298N: IN1 -> D7, IN2 -> D8, ENA -> D9, OUT1/OUT2 -> Motor
+// Nguồn motor cấp vào chân VCC của L298N, GND nối chung Arduino
