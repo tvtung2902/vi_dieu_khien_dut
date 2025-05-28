@@ -29,12 +29,12 @@ void loop() {
     tempF = HT.readTemperature(true);
     
     if(humi > 75){
-        digitalWrite(in1, HIGH);
-        digitalWrite(in2, LOW);
-        analogWrite(e, 70);
-    } else {
         digitalWrite(in1, LOW);
         digitalWrite(in2, HIGH);
+        analogWrite(e, 70);
+    } else {
+        digitalWrite(in1, HIGH);
+        digitalWrite(in2, LOW);
         analogWrite(e, 70);
     }
 
