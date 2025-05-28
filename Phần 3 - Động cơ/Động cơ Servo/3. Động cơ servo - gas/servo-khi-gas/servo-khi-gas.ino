@@ -14,7 +14,7 @@ void loop() {
   Serial.print("Nồng độ khí gas: ");
   Serial.println(val);
 
-  if (val > 400) {
+  if (val > 150) {
     Serial.println("Phát hiện khí gas → Servo quay 180°");
     sv.write(180);
     delay(700);

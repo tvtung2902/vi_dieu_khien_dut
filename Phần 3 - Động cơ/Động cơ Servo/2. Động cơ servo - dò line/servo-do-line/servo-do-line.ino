@@ -15,7 +15,7 @@ void loop() {
   Serial.print("Trạng thái dò line (digital): ");
   Serial.println(val);
 
-  if (val == 0) {
+  if (val == 1) {
     Serial.println("Line đen → Servo quay 30°");
     sv.write(30);
     delay(200);

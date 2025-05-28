@@ -6,7 +6,7 @@ int ldr = A0;
 int val;
 
 void setup() {
-  myservo.attach(6);
+  myservo.attach(9);
   Serial.begin(9600);
 }
 
@@ -36,7 +36,7 @@ Cách lắp:
     + Một chân nối A0
     + Chân còn lại nối 5V và GND
 - Servo:
-    + Tín hiệu -> D6
+    + Tín hiệu -> D9
     + VCC -> 5V
     + GND -> GND
 */
