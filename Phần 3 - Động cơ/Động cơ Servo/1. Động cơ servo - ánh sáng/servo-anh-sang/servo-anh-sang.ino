@@ -7,6 +7,7 @@ int val;
 
 void setup() {
   myservo.attach(9);
+  myservo.write(0);
   Serial.begin(9600);
 }
 
