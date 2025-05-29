@@ -144,4 +144,9 @@ Cách lắp:
   + GND -> GND
 
 - joystick:
+  + Y: A0
+  + SW: D3
+  + VCC -> 3.3V
+  + GND -> GND
+
 */
