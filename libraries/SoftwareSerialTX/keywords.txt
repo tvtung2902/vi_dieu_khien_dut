@@ -1,0 +1,36 @@
+##########################################
+# Syntax Coloring Map For SoftwareSerialTX
+##########################################
+#FUNCTIONS COLOR     #D35400 - ORANGE  KEYWORD1
+#FUNCTIONS COLOR     #D35400 - ORANGE  KEYWORD2
+#STRUCTURE COLORS    #728E00 - GREEN   KEYWORD3
+#VARIABLES COLOR     #00979C - BLUE    LITERAL1
+#
+# One TAB between name and description
+# ME Search:  ^([^\#^ ]+)( +)
+#    Replace: \0\t
+
+#######################################
+# Datatypes (KEYWORD3)
+#######################################
+SoftwareSerialTX	KEYWORD3
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+setTX	KEYWORD2
+begin	KEYWORD2
+write	KEYWORD2
+
+#######################################
+# Macros (KEYWORD2)
+#######################################
+
+#######################################
+# General macros (KEYWORD1)
+#######################################
+
+#######################################
+# Constants (LITERAL1)
+#######################################
