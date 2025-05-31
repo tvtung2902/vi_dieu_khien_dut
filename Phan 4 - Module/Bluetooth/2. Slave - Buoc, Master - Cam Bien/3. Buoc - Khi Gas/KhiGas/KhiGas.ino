@@ -31,7 +31,7 @@ void loop() {
 
 /*
 Cách lắp:
-- Cảm biến dò line:
+- Cảm biến khí gas:
     + 1 chân nối A0
     + 2 chân còn lại nối 5V và GND
 

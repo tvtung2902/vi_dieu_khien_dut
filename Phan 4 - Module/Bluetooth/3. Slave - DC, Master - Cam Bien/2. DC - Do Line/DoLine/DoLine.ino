@@ -1,9 +1,10 @@
 #include <SoftwareSerial.h>
 
 SoftwareSerial BT(10, 11); 
-const int pin = 0;
+const int pin = 2;
 
 void setup() {
+  pinMode(pin, INPUT);
   Serial.begin(9600);     
   BT.begin(9600);         
   Serial.println("Bắt đầu gửi dữ liệu qua HC-05");
@@ -12,12 +13,12 @@ void setup() {
 String lastCmd="";
 
 void loop() {
-  int value = analogRead(pin);
+  int value = digitalRead(pin);
   
   Serial.print("value: ");
   Serial.println(value);
 
-  String cmd = (value < 200) ? "KhongGas" : "CoGas";
+  String cmd = (value == 1) ? "den" : "trang";
 
   // gửi khi trạng thái thay đổi
   if (cmd != lastCmd) {
@@ -31,8 +32,8 @@ void loop() {
 
 /*
 Cách lắp:
-- Cảm biến khí gas:
-    + 1 chân nối A0
+- Cảm biến dò line:
+    + 1 chân nối D2
     + 2 chân còn lại nối 5V và GND
 
 - Module HC-05:

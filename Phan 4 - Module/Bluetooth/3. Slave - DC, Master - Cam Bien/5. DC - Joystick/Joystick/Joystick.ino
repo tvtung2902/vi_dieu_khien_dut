@@ -17,7 +17,18 @@ void loop() {
   Serial.print("value: ");
   Serial.println(value);
 
-  String cmd = (value < 200) ? "KhongGas" : "CoGas";
+  String cmd = "";
+  if (value < 400) {
+    cmd = "trai";
+  }
+
+  else if (value > 600){
+    cmd = "phai";
+  }
+
+  else {
+    cmd = "giua";
+  }
 
   // gửi khi trạng thái thay đổi
   if (cmd != lastCmd) {
@@ -31,9 +42,8 @@ void loop() {
 
 /*
 Cách lắp:
-- Cảm biến khí gas:
-    + 1 chân nối A0
-    + 2 chân còn lại nối 5V và GND
+- Joystick:
+    + Y: A0 (trái(nhỏ) phải(lớn) : y, trên(lớn) dưới(nhỏ) : x)
 
 - Module HC-05:
     + TX của HC-05 → chân 10
