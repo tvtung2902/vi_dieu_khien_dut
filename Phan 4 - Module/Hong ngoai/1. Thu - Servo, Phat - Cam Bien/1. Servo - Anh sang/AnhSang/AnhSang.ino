@@ -1,7 +1,8 @@
 #include <IRremote.h>
-IRsend irsend;// gửi tín hiệu hồng hoại
+IRsend irsend;
 
-int light =0;
+int pin = 0;
+
 void setup()
 {
   Serial.begin(9600);
@@ -9,15 +10,26 @@ void setup()
 
 void loop()
 {
-  int value = analogRead(A0);
+  int value = analogRead(pin);
   Serial.println(value);
-  if(value>800){
-    Serial.println("Tối -> Quay thuận 90 độ");
+
+  if(value > 800){
     irsend.sendSony(0x10, 12);// gửi tín hiệu HEX 0x10, 12 bits
   }
   else{
-    Serial.println("Sáng -> Quay nghịch 180 độ");
     irsend.sendSony(0x11, 12);// gửi tín hiệu HEX 0x10, 12 bits
   }
   delay(1000);
 }
+
+/*
+Cách lắp:
+- Cảm biến ánh sáng:
+    + 1 chân nối A0
+    + 2 chân còn lại nối 5V và GND
+
+- IR:
+    + (-): GND
+    + pin giữa: 5V
+    + pin còn lại: pin D3
+*/
