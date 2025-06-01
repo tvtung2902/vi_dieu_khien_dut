@@ -2,6 +2,7 @@
 #include <ESP8266WebServer.h>
 #include <Servo.h>
 
+String ip = "";
 const char* ssid = "PhongTro1_5G";
 const char* password = "mythien123";
 
@@ -167,7 +168,7 @@ void setup() {
   Serial.println("\nKết nối thành công!");
   Serial.print("IP: ");
   Serial.println(WiFi.localIP());
-
+  ip = WiFi.localIP().toString();
   server.on("/", handleRoot);
   server.on("/light", handleLight);
   server.on("/servo", handleServo);
@@ -177,6 +178,7 @@ void setup() {
 }
 
 void updateServo() {
+  Serial.println(ip);
   unsigned long currentTime = millis();
   
   if (currentTime - lastMoveTime >= moveInterval) {
