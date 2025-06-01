@@ -1,0 +1,251 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
+#include <DHT.h>
+
+String ip = "";
+const char* ssid = "PhongTro1_5G";
+const char* password = "mythien123";
+
+ESP8266WebServer server(80);
+
+// Pin động cơ DC
+const int IN1 = D1;
+const int IN2 = D2;
+const int ENA = D3;
+
+
+#define DHTType DHT11
+#define DHT11Pin D5
+
+DHT dht(DHT11Pin, DHTType);
+
+
+// Giao diện HTML
+const char MAIN_page[] PROGMEM = R"=====( 
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Điều khiển Động cơ & Cảm biến</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f8f9fa, #e0eafc);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    h1 {
+      font-size: 2em;
+      margin-bottom: 30px;
+      color: #222;
+    }
+    label {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+    }
+    input[type=number] {
+      font-size: 1.2em;
+      padding: 10px;
+      width: 180px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      outline: none;
+    }
+    .buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      font-size: 1.1em;
+      padding: 10px 25px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #ldrValue {
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: #444;
+      background: #fff;
+      padding: 15px 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Điều khiển Động cơ & Cảm biến</h1>
+
+  <label for="speedInput">Tốc độ (0 - 255):</label><br>
+  <input type="number" id="speedInput" value="255" min="0" max="255" placeholder="Nhập tốc độ"><br>
+
+  <div class="buttons">
+    <button onclick="sendCommand('forward')">Xoay thuận</button>
+    <button onclick="sendCommand('backward')">Xoay ngược</button>
+    <button onclick="sendCommand('stop')">Dừng</button>
+  </div>
+
+  <div id="ldrValue">Đang đọc...</div>
+
+  <script>
+    function getSpeed() {
+      let val = parseInt(document.getElementById('speedInput').value);
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > 255) val = 255;
+      return val;
+    }
+
+    function sendCommand(cmd) {
+      let speed = getSpeed();
+      fetch("/motor?cmd=" + cmd + "&speed=" + speed)
+        .then(res => res.text());
+    }
+
+    function fetchLDR() {
+      fetch("/ldr")
+        .then(res => res.text())
+        .then(val => {
+          document.getElementById('ldrValue').innerText = "Cảm biến: " + val;
+        });
+    }
+
+    document.getElementById('speedInput').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        let speed = getSpeed();
+        fetch("/motor?cmd=updateSpeed&speed=" + speed)
+          .then(res => res.text());
+      }
+    });
+
+    setInterval(fetchLDR, 1000);
+    fetchLDR();
+  </script>
+</body>
+</html>
+)=====";
+
+// Xử lý trang chính
+void handleRoot() {
+  server.send_P(200, "text/html", MAIN_page);
+}
+
+
+void handleDht() {
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+
+  if (isnan(temp) || isnan(hum)) {
+      // String contentBip = "Nhiệt độ: " + String(400) + " °C\n";
+      // contentBip += "Độ ẩm: " + String(600) + " %";
+      // server.send(200, "text/plain", contentBip);
+    server.send(500, "text/plain", "Lỗi đọc cảm biến");
+    return;
+  }
+
+  String content = "Nhiệt độ: " + String(temp) + " °C\n";
+  content += "Độ ẩm: " + String(hum) + " %";
+
+  server.send(200, "text/plain", content);
+}
+
+
+// Xử lý động cơ DC
+void handleMotor() {
+  if (server.hasArg("cmd")) {
+    String cmd = server.arg("cmd");
+    int speed = server.hasArg("speed") ? server.arg("speed").toInt() : 1023;
+    speed = constrain(speed, 0, 1023);
+
+    if (cmd == "forward") {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      analogWrite(ENA, speed);
+      server.send(200, "text/plain", "Đang xoay thuận với tốc độ " + String(speed));
+    } else if (cmd == "backward") {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      analogWrite(ENA, speed);
+      server.send(200, "text/plain", "Đang xoay ngược với tốc độ " + String(speed));
+    } else if (cmd == "stop") {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      analogWrite(ENA, 0);
+      server.send(200, "text/plain", "Đã dừng");
+    } else if (cmd == "updateSpeed") {
+      analogWrite(ENA, speed);
+      server.send(200, "text/plain", "Đã cập nhật tốc độ: " + String(speed));
+    } else {
+      server.send(400, "text/plain", "Lệnh không hợp lệ");
+    }
+  } else {
+    server.send(400, "text/plain", "Thiếu tham số cmd");
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  delay(1000);
+  WiFi.begin(ssid, password);
+  Serial.print("Kết nối WiFi...");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nĐã kết nối WiFi!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+  ip = WiFi.localIP().toString();
+
+  server.on("/", handleRoot);
+  server.on("/ldr", handleDht);
+  server.on("/motor", handleMotor);
+
+  server.begin();
+  Serial.println("Web server đã khởi động");
+}
+
+void loop() {
+  Serial.println(ip);
+
+  server.handleClient();
+}
+
+/*
+Cách lắp:
+- Cảm biến DHT:
+    + Digital -> D5
+    + VCC -> 3.3V
+    + GND -> GND
+
+
+- Module L298N:
+    + IN1 -> D2
+    + IN2 -> D1
+    + ENA -> D3(PWM)
+    + OUT1/OUT2 -> Motor DC
+    + VCC -> Pin, GND nối chung với Arduino
+*/
