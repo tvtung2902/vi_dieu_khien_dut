@@ -2,150 +2,232 @@
 #include <ESP8266WebServer.h>
 #include <Servo.h>
 
-#define SERVO_PIN D7
-#define joystickY A0
-#define joystickSW D3
-
+String ip = "";
 const char* ssid = "PhongTro1_5G";
 const char* password = "mythien123";
 
 ESP8266WebServer server(80);
-Servo servo;
 
-int sensor = 0;
-int targetAngle = 90;
-bool newAngleReceived = false;
+const int JOY_X_PIN = A0;
+const int JOY_Z_PIN = D5;
 
+const int SERVO_PIN = D1;
+Servo myServo;
 
+enum ServoState {
+  MOVING_TO_TARGET,
+  MOVING_TO_ZERO,
+  IDLE
+};
+
+volatile int targetAngle = 90;
+volatile int newTargetAngle = targetAngle;
+volatile bool newAngleReceived = false;
+volatile ServoState servoState = IDLE;
+unsigned long lastMoveTime = 0;
+const unsigned long moveInterval = 1000;
+
+// Giao diện web
 const char MAIN_page[] PROGMEM = R"=====( 
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>servo and sensor</title>
+  <meta charset="utf-8">
+  <title>Servo & Joystick</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #E76F51;
+      margin-bottom: 30px;
+    }
+
+    label {
+      font-size: 1.2em;
+      margin-bottom: 5px;
+    }
+
+    input[type=number] {
+      font-size: 1.5em;
+      padding: 10px;
+      width: 120px;
+      text-align: center;
+      border: 2px solid #E76F51;
+      border-radius: 8px;
+      background-color: #2c2c2c;
+      color: #ffffff;
+      outline: none;
+      margin-bottom: 20px;
+      transition: border 0.3s;
+    }
+
+    input[type=number]:focus {
+      border-color: #F4A261;
+    }
+
+    #joystickVal {
+      font-size: 1.4em;
+      background-color: #2c2c2c;
+      padding: 15px 25px;
+      border-radius: 10px;
+      border: 2px solid #E76F51;
+      margin-top: 20px;
+      box-shadow: 0 0 10px rgba(231, 111, 81, 0.5);
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #888;
+    }
+  </style>
 </head>
-<body style="font-family:Arial;text-align:center">
-  <h2>Điều Khiển Servo Và Hiển Thị Giá Trị Cảm Biến</h2>
-  <p>Joystick: <span id="sensor">đang load...</span> </p>
-  <p>
-    Góc Servo (0-180°): 
-    <input type="number" id="angle" min="0" max="180" value="90">
-    <button id="setAngleBtn" onclick="setAngle()">Cài góc</button>
-  </p>
+<body>
+  <h1>Điều Khiển Servo & Joystick</h1>
+
+  <label for="angleInput">Nhập góc quay (0 - 180):</label><br>
+  <input type="number" id="angleInput" value="90" min="0" max="180"><br>
+
+  <div id="joystickVal">Đang đọc joystick...</div>
+
+  <div class="footer">ESP8266 Web Control | Màu cam gạch + đen</div>
+
   <script>
-    function updateSensor() {
-      fetch('/getSensor')
-        .then(res => res.text())
-        .then(data => {
-          document.getElementById('sensor').innerText = data;
-        });
+    function getAngle() {
+      let val = parseInt(document.getElementById('angleInput').value);
+      if (isNaN(val) || val < 0) val = 0;
+      if (val > 180) val = 180;
+      return val;
     }
 
-    function setAngle() {
-      const angleInput = document.getElementById('angle');
-      const angleBtn = document.getElementById('setAngleBtn');
-      const angle = angleInput.value;
-
-      if (angle >= 0 && angle <= 180) {
-        angleBtn.disabled = true; // Disable button
-        fetch('/setAngle', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'angle=' + angle
-        })
-        .then(res => res.text())
-        .then(data => console.log(data))
-        .finally(() => {
-          angleBtn.disabled = false; // Enable again
-        });
-      } else {
-        alert("Vui lòng nhập góc từ 0 đến 180");
+    document.getElementById('angleInput').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        let angle = getAngle();
+        fetch("/servo?angle=" + angle)
+          .then(res => res.text())
+          .then(data => alert(data));
       }
+    });
+
+    function fetchJoystick() {
+      fetch("/joystick")
+        .then(res => res.json())
+        .then(data => {
+          console.log(data);
+          document.getElementById('joystickVal').innerText =
+            "Trục X: " + data.x + " | Nút Z: " + (data.z == 0 ? "Đã nhấn" : "Thả");
+        });
     }
 
-    setInterval(updateSensor, 500);
-    updateSensor();
+    setInterval(fetchJoystick, 1000);
+    fetchJoystick();
   </script>
 </body>
 </html>
 )=====";
 
-
-
 void handleRoot() {
-  server.send(200, "text/html", MAIN_page);
+  server.send_P(200, "text/html", MAIN_page);
 }
 
-void handleSetAngle() {
-  if (server.hasArg("angle")) {
-    targetAngle = server.arg("angle").toInt();
-    newAngleReceived = true;
-    server.send(200, "text/plain", "Đã cài góc " + String(targetAngle) + "°");
-  } else {
-    server.send(400, "text/plain", "Góc không hợp lệ");
+void handleJoystick() {
+  int xValue = analogRead(JOY_X_PIN);
+  int zState = digitalRead(JOY_Z_PIN);
+  
+  String json = "{\"x\":" + String(xValue) + ",\"z\":" + String(zState) + "}";
+  server.send(200, "application/json", json);
+}
+
+void handleServo() {
+  if (!server.hasArg("angle")) {
+    server.send(400, "text/plain", "Thiếu góc");
+    return;
   }
+  int angle = constrain(server.arg("angle").toInt(), 0, 180);
+  newTargetAngle = angle;
+  newAngleReceived = true;
+  server.send(200, "text/plain", "Góc mới sẽ được áp dụng sau chu kỳ hiện tại: " + String(newTargetAngle));
 }
-
-void handleGetSensor() {
-  int yValue = analogRead(joystickY);
-  int swValue = digitalRead(joystickSW);
-  String isPressed = "";
-  if (swValue){
-    isPressed = "không nhấn";
-  } else {
-    isPressed = "nhấn";
-  }
-  String content = "y: " + String(yValue) + ", sw : " + isPressed;
-  server.send(200, "text/plain", content);
-}
-
 void setup() {
   Serial.begin(115200);
-  
-  pinMode(joystickSW, INPUT_PULLUP);
+  pinMode(JOY_X_PIN, INPUT);
+  pinMode(JOY_Z_PIN, INPUT_PULLUP);
 
-  servo.attach(SERVO_PIN);
-  servo.write(targetAngle * 2);
+  myServo.attach(SERVO_PIN, 544, 2400);
+  myServo.write(0);
+  delay(1000);
 
   WiFi.begin(ssid, password);
-  Serial.print("Đang kết nối WiFi");
+  Serial.print("Kết nối WiFi...");
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-  Serial.println("\nWiFi đã kết nối! IP: " + WiFi.localIP().toString());
-
+  Serial.println("\nKết nối thành công!");
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+  ip = WiFi.localIP().toString();
   server.on("/", handleRoot);
-  server.on("/setAngle", HTTP_POST, handleSetAngle);
-  server.on("/getSensor", HTTP_GET, handleGetSensor);
+  server.on("/joystick", handleJoystick);
+  server.on("/servo", handleServo);
   server.begin();
-  Serial.println("Server đã sẵn sàng");
+  servoState = MOVING_TO_TARGET;
+  Serial.println("Web server đã sẵn sàng");
+}
+
+void updateServo() {
+  unsigned long currentTime = millis();
+  
+  if (currentTime - lastMoveTime >= moveInterval) {
+    Serial.println("Xoay");
+    lastMoveTime = currentTime;
+    switch (servoState) {
+      case MOVING_TO_TARGET:
+        myServo.write(targetAngle);
+        servoState = MOVING_TO_ZERO;
+        break;
+        
+      case MOVING_TO_ZERO:
+        myServo.write(0);
+        servoState = MOVING_TO_TARGET;
+        
+        if (newAngleReceived) {
+          targetAngle = newTargetAngle;
+          newAngleReceived = false;
+        }
+        break;
+        
+      case IDLE:
+        // Không làm gì
+        break;
+    }
+  }
 }
 
 void loop() {
+  Serial.println(ip);
   server.handleClient();
-
-  // Cập nhật servo nếu có góc mới
-  static unsigned long lastMove = 0;
-  if (millis() - lastMove > 1000 && newAngleReceived) {
-    Serial.print("targetAngle from client: ");
-    Serial.println(targetAngle);
-    servo.write(targetAngle * 2);
-    newAngleReceived = false;
-    lastMove = millis();
-  }
+  updateServo();
 }
 
 /*
 Cách lắp:
 - Servo:
-  + Tín hiệu -> D7
+  + Tín hiệu -> D1
   + VCC -> Vin
   + GND -> GND
 
 - joystick:
   + Y: A0
-  + SW: D3
+  + SW: D5
   + VCC -> 3.3V
   + GND -> GND
 
