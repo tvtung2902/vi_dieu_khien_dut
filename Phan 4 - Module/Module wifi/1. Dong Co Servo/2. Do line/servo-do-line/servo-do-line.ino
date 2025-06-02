@@ -139,7 +139,7 @@ void handleRoot() {
 
 void handleLine() {
   int lineValue = digitalRead(linePin);
-  
+  Serial.print(lineValue);
   String json = "{\"line\":" + String(lineValue) + "}";
   server.send(200, "application/json", json);
 }

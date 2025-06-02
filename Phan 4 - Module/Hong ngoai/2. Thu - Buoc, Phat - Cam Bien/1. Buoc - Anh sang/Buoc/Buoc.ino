@@ -13,7 +13,8 @@ Stepper stepper(BUOC, 8, 10, 9, 11);
 
 double goc_quay = 0;
 
-void setup() {
+void 
+setup() {
   stepper.setSpeed(10);
 
   Serial.begin(9600);

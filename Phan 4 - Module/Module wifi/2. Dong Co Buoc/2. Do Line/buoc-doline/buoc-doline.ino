@@ -77,7 +77,8 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
       fetch('/sensor')
         .then(res => res.json())
         .then(data => {
-          document.getElementById('sensor').innerText = data;
+          console.log(data);
+          document.getElementById('sensor').innerText = data < 700 ? "trắng" : "đen";
         });
     }
     setInterval(updateSensor, 800);

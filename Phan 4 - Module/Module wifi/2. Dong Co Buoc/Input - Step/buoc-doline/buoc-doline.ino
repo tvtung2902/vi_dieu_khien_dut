@@ -6,8 +6,7 @@ const char* password = "mythien123";
 
 ESP8266WebServer server(80);
 
-int trigPin = D0;
-int echoPin = D1;
+const int pinA0 = A0;
 
 const int in1 = D5;
 const int in2 = D6;
@@ -62,11 +61,11 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
 </head>
 <body>
   <div class="card">
-    <h2>Giá trị cảm biến siêu âm (cm)</h2>
+    <h2>Giá trị cảm biến dò line</h2>
     <p><strong id="sensor">?</strong></p>
     <hr>
     <h2>Điều khiển động cơ</h2>
-    Góc: <input type="number" id="angleInput" min="10" max="360" required> độ<br><br>
+    <input type="number" id="angleInput" min="0" max="2048" required> Bước<br><br>
     Chiều quay:
     <label><input type="radio" name="dir" value="cw" checked> Phải (CW)</label>
     <label><input type="radio" name="dir" value="ccw"> Trái (CCW)</label><br><br>
@@ -78,7 +77,7 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
       fetch('/sensor')
         .then(res => res.json())
         .then(data => {
-          document.getElementById('sensor').innerText = data;
+          document.getElementById('sensor').innerText = data < 700 ? "trắng" : "đen";
         });
     }
     setInterval(updateSensor, 800);
@@ -140,29 +139,13 @@ void handleRoot() {
 }
 
 void handleSensor() {
-    // xóa trạng thái củ của trigPin
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-
-  // gửi xung tín hiệu từ trigPin
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-
-  // đọc thời gian phản hồi từ echoPin(thời gian sóng âm truyền đi và quay lại)
-  long duration = pulseIn(echoPin, HIGH);
-
-  // tính khoảng cách theo công thức : Distance = (time * speed of sound) / 2
-  // 0.034 (m/micro s)
-  long distance = duration * 0.034 / 2;
-      
-
-  server.send(200, "text/plain", String(distance));
+  int value = analogRead(pinA0);
+  server.send(200, "text/plain", String(value));
 }
 
 void handleSetAngle() {
   if (server.hasArg("angle")) {
-    int angle = server.arg("angle").toInt();
+    int angle = (1.0* (server.arg("angle").toInt()) / 2048) * 360;
     directionCW = (server.arg("dir") == "cw");
     anglePerRun = angle;
     runMotor = true;
@@ -189,10 +172,6 @@ void setup() {
   server.on("/sensor", handleSensor);
   server.on("/set", handleSetAngle);
   server.begin();
-
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-
   Serial.println("Web server sẵn sàng");
 }
 
@@ -209,9 +188,8 @@ void loop() {
 
 /*
 Cách lắp:
-- Cảm biến siêu âm:
-    + Trig -> D0
-    + Echo -> D1
+- Cảm biến dò line:
+    + Analog -> A0
     + VCC -> 3.3V
     + GND -> GND
 

@@ -2,8 +2,8 @@
 #include <ESP8266WebServer.h>
 #include "DHT.h" 
 
-const char* ssid = "TP-LINK";
-const char* password = "28032004";
+const char* ssid = "PhongTro1_5G";
+const char* password = "mythien123";
 
 ESP8266WebServer server(80);
 

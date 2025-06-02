@@ -3,12 +3,13 @@
 #include <Servo.h>
 
 String ip = "";
+
 const char* ssid = "Tung";
 const char* password = "tung2922004";
 
 ESP8266WebServer server(80);
 
-const int lightPin = A0;
+const int linePin = 0;
 
 const int SERVO_PIN = D1;
 Servo myServo;
@@ -26,12 +27,13 @@ volatile ServoState servoState = IDLE;
 unsigned long lastMoveTime = 0;
 const unsigned long moveInterval = 1000;
 
+// Giao diện web
 const char MAIN_page[] PROGMEM = R"=====( 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
-  <title>Servo & Light</title>
+  <title>Servo & Line</title>
   <style>
     body {
       background-color: #1a1a1a;
@@ -71,7 +73,7 @@ const char MAIN_page[] PROGMEM = R"=====(
       border-color: #F4A261;
     }
 
-    #light {
+    #line {
       font-size: 1.4em;
       background-color: #2c2c2c;
       padding: 15px 25px;
@@ -89,14 +91,14 @@ const char MAIN_page[] PROGMEM = R"=====(
   </style>
 </head>
 <body>
-  <h1>Điều Khiển Servo & Light</h1>
+  <h1>Điều Khiển Servo & Line</h1>
 
   <label for="angleInput">Nhập góc quay (0 - 180):</label><br>
   <input type="number" id="angleInput" value="90" min="0" max="180"><br>
 
-  <div id="light">Đang đọc ánh sáng...</div>
+  <div id="line">Đang đọc Line...</div>
 
-  <div class="footer">ESP8266 Web Control</div>
+  <div class="footer">ESP8266 Web Control | Màu cam gạch + đen</div>
 
   <script>
     function getAngle() {
@@ -116,12 +118,12 @@ const char MAIN_page[] PROGMEM = R"=====(
     });
 
     function fetchCB() {
-      fetch("/light")
+      fetch("/line")
         .then(res => res.json())
         .then(data => {
           console.log(data);
-          document.getElementById('light').innerText =
-            "Nồng độ ánh sáng: " + data.light;
+          document.getElementById('line').innerText =
+            "Line: " + (Number(data.line) < 700 ? "Trắng" : "Đen");
         });
     }
 
@@ -135,10 +137,10 @@ void handleRoot() {
   server.send_P(200, "text/html", MAIN_page);
 }
 
-void handleLight() {
-  int lightValue = analogRead(lightPin);
-  
-  String json = "{\"light\":" + String(lightValue) + "}";
+void handleLine() {
+  int lineValue = analogRead(linePin);
+  Serial.print(lineValue);
+  String json = "{\"line\":" + String(lineValue) + "}";
   server.send(200, "application/json", json);
 }
 
@@ -152,8 +154,11 @@ void handleServo() {
   newAngleReceived = true;
   server.send(200, "text/plain", "Góc mới sẽ được áp dụng sau chu kỳ hiện tại: " + String(newTargetAngle));
 }
+
 void setup() {
   Serial.begin(115200);
+
+  // pinMode(linePin, INPUT);
 
   myServo.attach(SERVO_PIN, 544, 2400);
   myServo.write(0);
@@ -170,7 +175,7 @@ void setup() {
   Serial.println(WiFi.localIP());
   ip = WiFi.localIP().toString();
   server.on("/", handleRoot);
-  server.on("/light", handleLight);
+  server.on("/line", handleLine);
   server.on("/servo", handleServo);
   server.begin();
   servoState = MOVING_TO_TARGET;
@@ -201,6 +206,7 @@ void updateServo() {
         break;
         
       case IDLE:
+        // Không làm gì
         break;
     }
   }
@@ -211,7 +217,6 @@ void loop() {
   updateServo();
 }
 
-
 /*
 Cách lắp:
 - Servo:
@@ -219,8 +224,8 @@ Cách lắp:
   + VCC -> Vin
   + GND -> GND
 
-- Cảm biến ánh sáng:
+- Cảm biến dò line:
   + VCC -> 3.3V
-  + A0 -> A0
+  + DO -> A0
   + GND -> GND
 */
