@@ -1,10 +1,10 @@
 # Vi điều khiển - Bách Khoa Đà Nẵng  
 
-## Cấu trúc repository
+## Cấu trúc
 
 ### Phần 1 - Cơ Bản
 
-**Sử dụng các linh kiện và kiến thức cơ bản:**
+**Sử dụng các linh kiện và áp dụng các kiến thức cơ bản:**
 - Điều khiển LED, sử dụng nút nhấn, sử dụng còi, thực hiện ngắt ngoài...
 
 ---
@@ -16,8 +16,8 @@
 - Cảm biến dò line
 - Cảm biến hồng ngoại phát hiện di chuyển
 - Cảm biến khí gas
-- Cảm biến nhiệt độ và độ ẩm
 - Cảm biến nhiệt độ(analog & digital)
+- Cảm biến nhiệt độ và độ ẩm
 - Cảm biến siêu âm
 - Joystick
 
@@ -50,4 +50,4 @@
 
 - **Demo 2:** Bật/tắt 10 LED
   
-  ![LED Blink](Demo/10-led.gif)  
+  ![LED Blink](Demo/10-led.gif)
