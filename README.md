@@ -11,7 +11,7 @@
 
 ### Phần 2 - Cảm Biến
 
-***Sử dụng các cảm biến:**
+**Sử dụng các cảm biến:**
 - Cảm biến ánh sáng
 - Cảm biến dò line
 - Cảm biến hồng ngoại phát hiện di chuyển
@@ -25,7 +25,7 @@
 
 ### Phần 3 - Động Cơ
 
-***Sử dụng các động cơ kết hợp với cảm biến ở phần 2:**
+**Sử dụng các động cơ kết hợp với cảm biến ở phần 2:**
 - Động cơ DC
 - Động cơ bước
 - Động cơ Servo
@@ -34,7 +34,7 @@
 
 ### Phần 4 - Module
 
-***Sử dụng các module kết hợp với cảm biến ở phần 2 và động cơ ở phần 3:**
+**Sử dụng các module kết hợp với cảm biến ở phần 2 và động cơ ở phần 3:**
 - Module truyền nhận Hồng ngoại
 - Module Bluetooth
 - Module WiFi
