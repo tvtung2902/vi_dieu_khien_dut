@@ -4,11 +4,8 @@
 
 ### Phần 1 - Cơ Bản
 
-***Sử dụng các linh kiện và kiến thức cơ bản:**
-- Điều khiển LED
-- Sử dụng nút nhấn
-- Ngắt ngoài
-- Còi
+**Sử dụng các linh kiện và kiến thức cơ bản:**
+- Điều khiển LED, sử dụng nút nhấn, sử dụng còi, thực hiện ngắt ngoài...
 
 ---
 
@@ -20,6 +17,7 @@
 - Cảm biến hồng ngoại phát hiện di chuyển
 - Cảm biến khí gas
 - Cảm biến nhiệt độ và độ ẩm
+- Cảm biến nhiệt độ(analog & digital)
 - Cảm biến siêu âm
 - Joystick
 
