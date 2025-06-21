@@ -1,5 +1,48 @@
 # Vi điều khiển - Bách Khoa Đà Nẵng  
 
+## Cấu trúc repository
+
+### Phần 1 - Cơ Bản
+
+***Sử dụng các linh kiện và kiến thức cơ bản:**
+- Điều khiển LED
+- Sử dụng nút nhấn
+- Ngắt ngoài
+- Còi
+
+---
+
+### Phần 2 - Cảm Biến
+
+***Sử dụng các cảm biến:**
+- Cảm biến ánh sáng
+- Cảm biến dò line
+- Cảm biến hồng ngoại phát hiện di chuyển
+- Cảm biến khí gas
+- Cảm biến nhiệt độ và độ ẩm
+- Cảm biến siêu âm
+- Joystick
+
+---
+
+### Phần 3 - Động Cơ
+
+***Sử dụng các động cơ kết hợp với cảm biến ở phần 2:**
+- Động cơ DC
+- Động cơ bước
+- Động cơ Servo
+
+---
+
+### Phần 4 - Module
+
+***Sử dụng các module kết hợp với cảm biến ở phần 2 và động cơ ở phần 3:**
+- Module truyền nhận Hồng ngoại
+- Module Bluetooth
+- Module WiFi
+
+---
+
 ## Demo  
 
 - **Demo 1:** Bật/tắt LED
