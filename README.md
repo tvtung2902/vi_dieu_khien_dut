@@ -28,16 +28,16 @@
 **Sử dụng các động cơ kết hợp với cảm biến ở phần 2:**
 - Động cơ DC
 - Động cơ bước
-- Động cơ Servo
+- Động cơ servo
 
 ---
 
 ### Phần 4 - Module
 
 **Sử dụng các module kết hợp với cảm biến ở phần 2 và động cơ ở phần 3:**
-- Module truyền nhận Hồng ngoại
-- Module Bluetooth
-- Module WiFi
+- Module truyền nhận hồng ngoại
+- Module bluetooth
+- Module wiFi
 
 ---
 
